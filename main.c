@@ -32,9 +32,7 @@ int main (int argc, char *argv[]) {
     int n, conjunto = 1;
     //Ler número de cidades
     while (scanf("%d", &n) == 1) {
-        if (conjunto > 1) {
-            printf("\n");
-        }
+        
         printf("Conjunto #%d\n", conjunto++);
         total_cidades = n;
 
