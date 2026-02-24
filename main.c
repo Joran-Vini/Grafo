@@ -26,6 +26,7 @@ int buscar_id(char *nome);
 void adicionar_voo(int origem, int destino, int tempo);
 void liberar_grafo();
 void processar_turne(char *artista, int permanencia, char* origem, char* destino);
+int djkistra(int origem, int destino);
 
 int main (int argc, char *argv[]) {
     int n, conjunto = 1;
@@ -108,11 +109,58 @@ void processar_turne(char *artista, int permanencia, char* origem, char* destino
     }
     //Se chegou aqui é possivel a turne
     printf("%s\n", artista);
-    int hora_atual = 0;
-    int dia_atual = 1;
 
-    
+    int rota[MAX_CIDADES];
+    int conta_rota = 0;
+    int aux = id_destino;
 
+    while (aux != -1) {
+        rota[conta_rota++] = aux;
+        aux = pai[aux];
+    }
+
+    //Inverter o array para obter a ordem correta
+    for (int i = 0; i < conta_rota / 2; i++) {
+        int temp = rota[i];
+        rota[i] = rota[conta_rota - 1 - i];
+        rota[conta_rota - 1 - i] = temp;
+    }
+
+    int dia_chegada[MAX_CIDADES];
+    int tempo_atual = 0;
+    for (int i = 0; i < conta_rota; i++) {
+        dia_chegada[i] = (tempo_atual / 24) + 1;
+        tempo_atual += permanencia;
+
+        if (i < conta_rota - 1) {
+            int u = rota[i];
+            int v = rota[i + 1];
+
+            No* p = grafo[u].lista_adj;
+            while (p != NULL) {
+                if (p->id_destino == v) {
+                    tempo_atual += p->peso;
+                    break;
+                }
+                p = p->prox;
+            }
+        }
+    }
+
+    int ultimo_dia = dia_chegada[conta_rota - 1];
+    int idx = 0;
+
+    for (int d = 1; d <= ultimo_dia; d++) {
+        printf("%d:", d);
+
+        while (idx <conta_rota && dia_chegada[idx] == d) {
+                printf(" %s", grafo[rota[idx]].nome);
+                idx++;
+            }
+        printf("\n");    
+        }
+       
+    printf("%d\n\n", dist[id_destino]);
 }
 
 int djkistra(int origem, int destino) {
