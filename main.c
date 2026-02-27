@@ -25,31 +25,40 @@ int total_cidades = 0;
 int buscar_id(char *nome);
 void adicionar_voo(int origem, int destino, int tempo);
 void liberar_grafo();
-void processar_turne(char *artista, int permanencia, char* origem, char* destino);
+void processar_turne(char *artista, int permanencia, char* origem, char* destino, FILE* saida);
 int djkistra(int origem, int destino);
 
 int main (int argc, char *argv[]) {
+
+    FILE* entrada = fopen("entrada.in", "r");
+    FILE* saida = fopen("saida.out", "w");
+    // verificando se conseguiu abrir os arquivos
+    if (entrada == NULL) {
+        printf("Erro: Nao foi possivel abrir entrada.in\n");
+        return 1;
+    }
+        
     int n, conjunto = 1;
     //Ler número de cidades
-    while (scanf("%d", &n) == 1) {
+    while (fscanf(entrada, "%d", &n) == 1) {
         
-        printf("Conjunto #%d\n", conjunto++);
+        fprintf(saida, "Conjunto #%d\n", conjunto++);
         total_cidades = n;
 
         // ler cidades
         for (int i = 0; i < n; i++) {
-            scanf("%s", grafo[i].nome);
+            fscanf(entrada, "%s", grafo[i].nome);
             grafo[i].lista_adj = NULL;
         }
         // ler conexões
         for (int i = 0; i < n; i++) {
             int num_conexoes;
-            scanf("%d", &num_conexoes);
+            fscanf(entrada, "%d", &num_conexoes);
 
             for (int j = 0; j < num_conexoes; j++) {
                 char nome_destino[MAX_NOME];
                 int tempo;
-                scanf("%s %d", nome_destino, &tempo);
+                fscanf(entrada, "%s %d", nome_destino, &tempo);
                 int id_destino = buscar_id(nome_destino);
                 adicionar_voo(i, id_destino, tempo);
             }
@@ -57,15 +66,18 @@ int main (int argc, char *argv[]) {
 
         // ler artistas
         int m;
-        scanf("%d", &m);
+        fscanf(entrada, "%d", &m);
         for (int i = 0; i < m; i++) {
             char nome_artista[MAX_NOME], origem[MAX_NOME], destino[MAX_NOME];
             int x_permanencia;
-            scanf("%s %d %s %s", nome_artista, &x_permanencia, origem, destino);
-            processar_turne(nome_artista, x_permanencia, origem, destino);
+            fscanf(entrada, "%s %d %s %s", nome_artista, &x_permanencia, origem, destino);
+            processar_turne(nome_artista, x_permanencia, origem, destino, saida);
         }
         liberar_grafo();
+        fprintf(saida, "\n");
     }
+    fclose(entrada);
+    fclose(saida);
     return 0;
 }
 
@@ -97,16 +109,16 @@ void liberar_grafo() {
     }
 }
 
-void processar_turne(char *artista, int permanencia, char* origem, char* destino) {
+void processar_turne(char *artista, int permanencia, char* origem, char* destino, FILE* saida) {
     int id_origem = buscar_id(origem);
     int id_destino = buscar_id(destino);
 
     if (!djkistra(id_origem, id_destino)) {
-        printf("%s\nturne cancelada\n\n", artista);
+        fprintf(saida, "%s\nturne cancelada\n", artista);
         return;
     }
     //Se chegou aqui é possivel a turne
-    printf("%s\n", artista);
+    fprintf(saida, "%s\n", artista);
 
     int rota[MAX_CIDADES];
     int conta_rota = 0;
@@ -149,16 +161,16 @@ void processar_turne(char *artista, int permanencia, char* origem, char* destino
     int idx = 0;
 
     for (int d = 1; d <= ultimo_dia; d++) {
-        printf("%d:", d);
+        fprintf(saida, "%d:", d);
 
         while (idx <conta_rota && dia_chegada[idx] == d) {
-                printf(" %s", grafo[rota[idx]].nome);
+                fprintf(saida, " %s", grafo[rota[idx]].nome);
                 idx++;
             }
-        printf("\n");    
+        fprintf(saida, "\n");    
         }
        
-    printf("%d\n\n", dist[id_destino]);
+    fprintf(saida, "%d\n\n", dist[id_destino]);
 }
 
 int djkistra(int origem, int destino) {
